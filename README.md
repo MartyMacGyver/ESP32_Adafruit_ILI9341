@@ -1,24 +1,47 @@
+# Library for ILI9341-based TFT displays on the Espressif ESP32 native build platform
+
 ## Credits
-Port of modified Adafruit library for ILI9341-based TFT displays.
+Basis: https://github.com/adafruit/Adafruit_ILI9341
+    This is a library for the Adafruit ILI9341 display products
+    
+    This library works with the Adafruit 2.8" Touch Shield V2 (SPI)
+      ----> http://www.adafruit.com/products/1651
+     
+    Check out the links above for our tutorials and wiring diagrams.
+    These displays use SPI to communicate, 4 or 5 pins are required
+    to interface (RST is optional).
+    
+    Adafruit invests time and resources providing this open source code,
+    please support Adafruit and open-source hardware by purchasing
+    products from Adafruit!
 
-Original lib: https://github.com/adafruit/Adafruit_ILI9341
+    Written by Limor Fried/Ladyada for Adafruit Industries.
+    MIT license, all text above must be included in any redistribution
 
-The library is extended with text rendering routines got from here: http://www.instructables.com/id/Arduino-TFT-display-and-font-library/?ALLSTEPS
+As modified by Sermus for the ESP8266: https://github.com/Sermus/ESP8266_Adafruit_ILI9341
+
+And further modified by Rudi, et. al. for the ESP32: http://esp32.com/viewtopic.php?f=18&t=636#p2907
+
+Extended with text rendering routines from: http://www.instructables.com/id/Arduino-TFT-display-and-font-library/?ALLSTEPS
 
 Original hspi code: https://github.com/Perfer/esp8266_ili9341
 
-The sample project is to be built with ESP8266 Unofficial Development Kit aka UDK. 
-http://esp8266.ru/forum/threads/obsuzhdenie-unofficial-development-kit-for-espressif-esp8266.32/
+## Setup
+The sample project is to be built with Espressif IDF as configured for the ESP32:
+https://github.com/espressif/esp-idf
 
 ## ILI9341 driver
 The driver itself and needed dependencies are in /driver and /include/driver.
 The driver is written in C++ which is not well supported by ESP8266 toolchain and sdk, so some dirty hack is needed to properly contstruct C++ objects. The code for this is in user/routines.cpp.
 
-## SPI staff
+## SPI stuff
 In spite of the fact that according to the datasheet max ILI9341's clock speed is 10MHz mine robustly works at up to 40MHz so I added SPI speed prescaler macro at the beginning of hspi.c.
 Defining it to 1 means HSPI will be clocked at 40MHz, 4 means 10 MHz.
 
 ## Sample code
+
+*** Note: HVAC display demo is the only part being migrated from ESP8266 at this point ***
+
 The sample code consists of two parts:
 
 1) Rotating cube https://youtu.be/kEWThKicO0Q
@@ -27,23 +50,18 @@ The sample code consists of two parts:
 
 What to demonstrate is controlled by macro UIDEMO defined at the beginning of user_main.cpp. If it's defined then the sample HVAC controller UI is shown, else, the rotating cube is rendered.
 
+*** Note: For HVAC display demo we are using the ESP32-WROVER-KIT ***
+
 ## Wiring
 The code uses hardware HSPI with hardware controlled CS, so the wiring shall be as follows: 
 
-ILI9341 pin -->	ESP8266 pin
-
-MOSI 	-->	GPIO13
-
-CLK 	-->	GPIO14
-
-CS 	-->	GPIO15
-
-DC 	-->	GPIO2
-
-Reset to 3.3v
-
-GND to ground
-
-MISO may be left unconnected
+    ILI9341 pin --> ESP32 GPIO pin of choice
+    MOSI        --> GPIO13
+    MISO        --> n/c
+    CLK         --> GPIO14
+    CS          --> GPIO15
+    DC          --> GPIO2
+    Reset       --> pull up to 3.3V
+    GND         --> ground
 
 
