@@ -7,21 +7,42 @@
 #define __min(a,b) ((a > b) ? (b):(a))
 uint32_t *spi_fifo;
 
+
 void hspi_init(void)
 {
     /*GPIO Inits according to Dev board for ILI9341*/
     spi_fifo = (uint32_t*)SPI_W0_REG(HSPI); //needed?
+
+
+   // orig
+    // PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO19_U, 2);  
+    // PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO23_U, 2);  
+    // PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO18_U, 2);  
+    // PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO5_U, 2);   
+           
+   /* changed rudi */
+    PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO25_U, 2);  //MISO GPIO19 // -> 25
+    PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO23_U, 2);  //MOSI GPIO23 // -> 23
+    PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO19_U, 2);  //CLK GPIO18  // -> 19
+    PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO22_U, 2);   //CS GPIO5   // -> 22
     
-    PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO19_U, 2);  //MISO GPIO19
-    PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO23_U, 2);  //MOSI GPIO23
-    PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO18_U, 2);  //CLK GPIO18
-    PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO5_U, 2);   //CS GPIO5
+    // orig
+    //  gpio_matrix_in(GPIO_NUM_19, HSPIQ_IN_IDX,0);
+    //  gpio_matrix_out(GPIO_NUM_23, HSPID_OUT_IDX,0,0);
+    //  gpio_matrix_out(GPIO_NUM_18, HSPICLK_OUT_IDX,0,0);
     
-    gpio_matrix_in(GPIO_NUM_19, HSPIQ_IN_IDX,0);
+     /* changed rudi */
+    gpio_matrix_in(GPIO_NUM_25, HSPIQ_IN_IDX,0);
     gpio_matrix_out(GPIO_NUM_23, HSPID_OUT_IDX,0,0);
-    gpio_matrix_out(GPIO_NUM_18, HSPICLK_OUT_IDX,0,0);
-    gpio_matrix_out(GPIO_NUM_5, HSPICS0_OUT_IDX,0,0);
+    gpio_matrix_out(GPIO_NUM_19, HSPICLK_OUT_IDX,0,0);
     
+   // orig
+   // gpio_matrix_out(GPIO_NUM_5, HSPICS0_OUT_IDX,0,0);
+    
+   /* changed rudi */
+   gpio_matrix_out(GPIO_NUM_22, HSPICS0_OUT_IDX,0,0);
+    
+
     spi_attr_t hSpiAttr;
     hSpiAttr.mode     = SpiMode_Master;
     hSpiAttr.subMode  = SpiSubMode_0;
@@ -29,6 +50,7 @@ void hspi_init(void)
     hSpiAttr.bitOrder = SpiBitOrder_MSBFirst;
     hSpiAttr.halfMode = SpiWorkMode_Half;
     spi_init(HSPI, &hSpiAttr);
+
 }
 
 void hspi_send_uint16_r(uint16_t data, int32_t repeats)

@@ -79,17 +79,35 @@ extern "C"
 #define ILI9341_YELLOW  0xFFE0  
 #define ILI9341_WHITE   0xFFFF
 
-#define TFT_DC_DATA     GPIO_OUTPUT_SET(25, 1)
-#define TFT_DC_COMMAND  GPIO_OUTPUT_SET(25, 0)
-#define TFT_DC_INIT     PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO25_U, FUNC_GPIO25_GPIO25); TFT_DC_DATA
+// orig
+// #define TFT_DC_DATA     GPIO_OUTPUT_SET(25, 1)
+// #define TFT_DC_COMMAND  GPIO_OUTPUT_SET(25, 0)
+// #define TFT_DC_INIT     PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO25_U, FUNC_GPIO25_GPIO25); TFT_DC_DATA
 
-#define TFT_BKL_INIT    gpio_set_direction(GPIO_NUM_16,GPIO_MODE_OUTPUT);TFT_BKL_ON 
-#define TFT_BKL_ON      gpio_set_level(GPIO_NUM_16,1)
-#define TFT_BKL_OFF     gpio_set_level(GPIO_NUM_16,0)
+/* changed rudi */
+#define TFT_DC_DATA     GPIO_OUTPUT_SET(21, 1)
+#define TFT_DC_COMMAND  GPIO_OUTPUT_SET(21, 0)
+#define TFT_DC_INIT     PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO21_U, FUNC_GPIO21_GPIO21); TFT_DC_DATA
 
-#define TFT_RST_ACTIVE    GPIO_OUTPUT_SET(17, 0)
-#define TFT_RST_DEACTIVE  GPIO_OUTPUT_SET(17, 1)
-#define TFT_RST_INIT      PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO17_U, FUNC_GPIO17_GPIO17); TFT_RST_DEACTIVE
+// orig
+// #define TFT_BKL_INIT    gpio_set_direction(GPIO_NUM_16,GPIO_MODE_OUTPUT);TFT_BKL_ON 
+// #define TFT_BKL_ON      gpio_set_level(GPIO_NUM_16,1)
+// #define TFT_BKL_OFF     gpio_set_level(GPIO_NUM_16,0)
+
+/* changed rudi */
+#define TFT_BKL_INIT    gpio_set_direction(GPIO_NUM_5,GPIO_MODE_OUTPUT);TFT_BKL_ON 
+#define TFT_BKL_ON      gpio_set_level(GPIO_NUM_5,0)     // Important - here was 0,1 swap so your screen is now light 
+#define TFT_BKL_OFF     gpio_set_level(GPIO_NUM_5,1)    // Important - here was 0,1 swap so your screen is now light
+
+//  orig
+// #define TFT_RST_ACTIVE    GPIO_OUTPUT_SET(17, 0)
+// #define TFT_RST_DEACTIVE  GPIO_OUTPUT_SET(17, 1)
+// #define TFT_RST_INIT      PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO17_U, FUNC_GPIO17_GPIO17); TFT_RST_DEACTIVE
+
+/* changed rudi */
+#define TFT_RST_ACTIVE    GPIO_OUTPUT_SET(18, 0)
+#define TFT_RST_DEACTIVE  GPIO_OUTPUT_SET(18, 1)
+#define TFT_RST_INIT      PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO18_U, FUNC_GPIO18_GPIO18); TFT_RST_DEACTIVE
 
 #define MAKEWORD(b1, b2, b3, b4) (uint32_t(b1) | ((b2) << 8) | ((b3) << 16) | ((b4) << 24))
 
