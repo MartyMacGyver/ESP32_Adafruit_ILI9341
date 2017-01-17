@@ -2,8 +2,7 @@
 #define _ADAFRUIT_GFX_AS_H
 
 #include "Load_fonts.h"
-#include <c_types.h>
-
+#include "esp_types.h"
 
 class Adafruit_GFX_AS {
  public:

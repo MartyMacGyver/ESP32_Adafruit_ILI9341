@@ -1,16 +1,17 @@
 #include "Adafruit_ILI9341_fast_as.h"
 #include "Adafruit_GFX_AS.h"
+#include "driver/spi.h"
+#include "rom/ets_sys.h"
+#include "driver/hspi.h"
 
 extern "C"{
-#include <ets_sys.h>
-#include <os_type.h>
-#include <osapi.h>
-#include "hspi.h"
-#include "espmissingincludes.h"
+
 }
 
 #define SWAPBYTES(i) ((i>>8) | (i<<8))
-ICACHE_FLASH_ATTR Adafruit_ILI9341::Adafruit_ILI9341() : Adafruit_GFX_AS(ILI9341_TFTWIDTH, ILI9341_TFTHEIGHT) {
+
+Adafruit_ILI9341::Adafruit_ILI9341() : Adafruit_GFX_AS(ILI9341_TFTWIDTH, ILI9341_TFTHEIGHT)
+{
 	tabcolor = 0;
 }
 
@@ -18,24 +19,42 @@ void Adafruit_ILI9341::transmitCmdData(uint8_t cmd, const uint8_t *data, uint8_t
 {
 	hspi_wait_ready();
 	TFT_DC_COMMAND;
-	hspi_send_uint8(cmd);
+	spi_data_t spi_data;
+    spi_data.addr = NULL;
+	spi_data.addrLen = 0;
+	spi_data.cmd = cmd;
+	spi_data.cmdLen = 1;
+	spi_data.rxData = NULL;
+	spi_data.rxDataLen=0;
+	spi_data.txData=NULL;
+	spi_data.txDataLen = 0;
+    spi_master_send_data(SpiNum_SPI2, &spi_data);
+
 	hspi_wait_ready();
 	TFT_DC_DATA;
-	hspi_send_data(data, numDataByte);
+    spi_data.addr = NULL;
+	spi_data.addrLen = 0;
+	spi_data.cmd = 0;
+	spi_data.cmdLen = 0;
+	spi_data.rxData = NULL;
+	spi_data.rxDataLen=0;
+	spi_data.txData=(uint32_t*)data;
+	spi_data.txDataLen = numDataByte;
+    spi_master_send_data(SpiNum_SPI2, &spi_data);
 }
 
-ICACHE_FLASH_ATTR void Adafruit_ILI9341::begin(void) {
-	//Set communication using HW SPI Port
+void Adafruit_ILI9341::begin(void) {
+	
 	hspi_init();
 	TFT_DC_INIT;
 	TFT_RST_INIT;
-
 	TFT_RST_ACTIVE;
-	os_delay_us(10000);
+	ets_delay_us(10000);
 	TFT_RST_DEACTIVE;
-	os_delay_us(1000);
+	ets_delay_us(1000);
 
-	uint8_t data[15] = {0};
+    uint32_t data_32[4] = {0};
+	uint8_t* data = (uint8_t*)data_32;
 
 	data[0] = 0x39;
 	data[1] = 0x2C;
@@ -136,24 +155,24 @@ ICACHE_FLASH_ATTR void Adafruit_ILI9341::begin(void) {
 	transmitCmdData(0xE1, data, 15);    	//Set Gamma
 
 	transmitCmd(0x11);    	//Exit Sleep
-	os_delay_us(120000);
+	ets_delay_us(120000);
 
 	transmitCmd(0x29);    //Display on
 	transmitCmd(0x2c);
+
+	TFT_BKL_INIT; 		 //Backlight ON
 }
 
-void Adafruit_ILI9341::drawPixel(int16_t x, int16_t y, uint16_t color) {
-
+void Adafruit_ILI9341::drawPixel(int16_t x, int16_t y, uint16_t color)
+{
 	if((x < 0) ||(x >= _width) || (y < 0) || (y >= _height)) return;
-	setAddrWindow(x,y,x+1,y+1);
+	setAddrWindow(x, y, x+1, y+1);
 	transmitData(SWAPBYTES(color));
 }
 
 
-void Adafruit_ILI9341::drawFastVLine(int16_t x, int16_t y, int16_t h,
-		uint16_t color) {
-
-	// Rudimentary clipping
+void Adafruit_ILI9341::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
+{	// Rudimentary clipping
 	if((x >= _width) || (y >= _height)) return;
 
 	if((y+h-1) >= _height)
@@ -163,25 +182,22 @@ void Adafruit_ILI9341::drawFastVLine(int16_t x, int16_t y, int16_t h,
 	transmitData(SWAPBYTES(color), h);
 }
 
-void Adafruit_ILI9341::drawFastHLine(int16_t x, int16_t y, int16_t w,
-		uint16_t color) {
-
-	// Rudimentary clipping
+void Adafruit_ILI9341::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color) 
+{	// Rudimentary clipping
 	if((x >= _width) || (y >= _height)) return;
 	if((x+w-1) >= _width)  w = _width-x;
 	setAddrWindow(x, y, x+w-1, y);
 	transmitData(SWAPBYTES(color), w);
 }
 
-ICACHE_FLASH_ATTR void Adafruit_ILI9341::fillScreen(uint16_t color) {
+void Adafruit_ILI9341::fillScreen(uint16_t color) 
+{
 	fillRect(0, 0,  _width, _height, color);
 }
 
 // fill a rectangle
-void Adafruit_ILI9341::fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
-		uint16_t color) {
-
-	// rudimentary clipping (drawChar w/big text requires this)
+void Adafruit_ILI9341::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) 
+{	// rudimentary clipping (drawChar w/big text requires this)
 	if((x >= _width) || (y >= _height)) return;
 	if((x + w - 1) >= _width)  w = _width  - x;
 	if((y + h - 1) >= _height) h = _height - y;
@@ -190,12 +206,11 @@ void Adafruit_ILI9341::fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
 	transmitData(SWAPBYTES(color), h*w);
 }
 
-
 // Pass 8-bit (each) R,G,B, get back 16-bit packed color
-uint16_t Adafruit_ILI9341::color565(uint8_t r, uint8_t g, uint8_t b) {
+uint16_t Adafruit_ILI9341::color565(uint8_t r, uint8_t g, uint8_t b) 
+{
 	return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
 }
-
 
 #define MADCTL_MY  0x80
 #define MADCTL_MX  0x40
@@ -205,8 +220,8 @@ uint16_t Adafruit_ILI9341::color565(uint8_t r, uint8_t g, uint8_t b) {
 #define MADCTL_BGR 0x08
 #define MADCTL_MH  0x04
 
-void Adafruit_ILI9341::setRotation(uint8_t m) {
-
+void Adafruit_ILI9341::setRotation(uint8_t m)
+{
 	uint8_t data;
 	rotation = m % 4; // can't be higher than 3
 	switch (rotation) {
@@ -234,7 +249,7 @@ void Adafruit_ILI9341::setRotation(uint8_t m) {
 	transmitCmdData(ILI9341_MADCTL, &data, 1);
 }
 
-
-void Adafruit_ILI9341::invertDisplay(bool i) {
+void Adafruit_ILI9341::invertDisplay(bool i)
+{
 	transmitCmd(i ? ILI9341_INVON : ILI9341_INVOFF);
 }

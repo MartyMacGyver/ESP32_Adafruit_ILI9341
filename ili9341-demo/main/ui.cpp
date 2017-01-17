@@ -1,7 +1,8 @@
+/* Adapted from Sermus' project : https://github.com/Sermus/ESP8266_Adafruit_ILI9341*/
+
 #include <Adafruit_GFX_AS.h>
 #include <Adafruit_ILI9341_fast_as.h>
 #include <time.h>
-#include <c_types.h>
 
 extern "C" {
 #include "mini-printf.h"
@@ -25,7 +26,6 @@ extern "C" {
 #define VGA_NAVY		0x0010
 #define VGA_FUCHSIA		0xF81F
 #define VGA_PURPLE		0x8010
-
 
 extern Adafruit_ILI9341 tft;
 
@@ -57,7 +57,7 @@ int color(uint8_t r, uint8_t g, uint8_t b)
 	return ((r&248)|g>>5) << 8 | ((g&28)<<3|b>>3);
 }
 
-ICACHE_FLASH_ATTR int drawPlaceholder(int x, int y, int width, int height, int bordercolor, const char* headertext)
+int drawPlaceholder(int x, int y, int width, int height, int bordercolor, const char* headertext)
 {
 	int headersize = 18;
 	tft.drawRoundRect(x, y, width, height, 3, bordercolor);
@@ -70,7 +70,8 @@ ICACHE_FLASH_ATTR int drawPlaceholder(int x, int y, int width, int height, int b
 const char* kidroom = "Kidroom";
 const char* bedroom = "Bedroom";
 const char* outside = "Outside";
-ICACHE_FLASH_ATTR void drawWireFrame()
+
+void drawWireFrame()
 {
 	tft.setTextColor(VGA_SILVER, VGA_BLACK);
 	//Target placeholder
@@ -101,7 +102,7 @@ ICACHE_FLASH_ATTR void drawWireFrame()
 	tft.drawString("24hOn", 160, placeholderbody + 62, LINETEXT);
 }
 
-ICACHE_FLASH_ATTR void drawTemperatures()
+void drawTemperatures()
 {
 	tft.setTextColor(VGA_AQUA, VGA_BLACK);
 	tft.fillRect(255, 20, 48, 16, VGA_BLACK);
@@ -114,7 +115,7 @@ ICACHE_FLASH_ATTR void drawTemperatures()
 	tft.drawFloat(outside_temperature, 1, 255, 60, LINETEXT);
 }
 
-ICACHE_FLASH_ATTR  void drawWaterTemperatures()
+void drawWaterTemperatures()
 {
 	tft.setTextColor(VGA_AQUA, VGA_BLACK);
 	tft.fillRect(255, 100, 48, 16, VGA_BLACK);
@@ -124,12 +125,13 @@ ICACHE_FLASH_ATTR  void drawWaterTemperatures()
 	tft.drawFloat(target_RW_temperature, 2, 255, 120, LINETEXT);
 }
 
-ICACHE_FLASH_ATTR  time_t now()
+time_t now()
 {
-	return system_get_rtc_time() / 100000 - start_time;
+return 1;
+	//return system_get_rtc_time() / 100000 - start_time;
 }
 
-ICACHE_FLASH_ATTR  void drawUpdated()
+void drawUpdated()
 {
 	tft.setTextColor(VGA_SILVER, VGA_BLACK);
 	time_t cursecs = now();
@@ -156,7 +158,7 @@ ICACHE_FLASH_ATTR  void drawUpdated()
 	tft.drawFloat(float(last24h_on_time) / (last24h_on_time + last24h_off_time) * 100, 1, 260, 222, LINETEXT);
 }
 
-ICACHE_FLASH_ATTR  void drawTargetTemp()
+void drawTargetTemp()
 {
 	uint8_t colorvalue = (target_room_temperature - min_target_temp) / (max_target_temp - min_target_temp) * 255;
 	int _color = color(colorvalue, 0, 255 - colorvalue);
@@ -164,21 +166,19 @@ ICACHE_FLASH_ATTR  void drawTargetTemp()
 	tft.drawFloat(target_room_temperature, 1, 7, 24, 7);
 }
 
-ICACHE_FLASH_ATTR void updateFireIcon()
+void updateFireIcon()
 {
-	if (heater_enabled)
-	{
+	if (heater_enabled)	{
 		tft.setTextColor(VGA_RED, VGA_BLACK);
 		tft.drawString(" ON ", 52, 110, 2);
 	}
-	else
-	{
+	else {
 		tft.setTextColor(VGA_GRAY, VGA_BLACK);
 		tft.drawString("OFF", 52, 110, 2);
 	}
 }
 
-ICACHE_FLASH_ATTR void drawTargetTempScreen()
+void drawTargetTempScreen()
 {
 	uint8_t barHeight = 8;
 	uint8_t barSpace = 4;
@@ -191,12 +191,10 @@ ICACHE_FLASH_ATTR void drawTargetTempScreen()
 		int width = initialBarWidth + 1.0f / 1404 * y * y + 0.1624 * y;
 		uint8_t colorvalue = float(i) / numBars * 255;
 		int _color = color(colorvalue, 0, 255 - colorvalue);
-		if (barTemp <= target_room_temperature)
-		{
+		if (barTemp <= target_room_temperature)	{
 			tft.fillRoundRect(0, tft.height() - y - barHeight, width, barHeight, 3, _color);
 		}
-		else
-		{
+		else {
 			tft.fillRoundRect(1, tft.height() - y - barHeight + 1, width - 2, barHeight - 2, 3, VGA_BLACK);
 			tft.drawRoundRect(0, tft.height() - y - barHeight, width, barHeight, 3, _color);
 		}
@@ -208,24 +206,20 @@ ICACHE_FLASH_ATTR void drawTargetTempScreen()
 }
 
 bool currentChangeTempMode = false;
-ICACHE_FLASH_ATTR void updateScreen(bool changeTempMode)
+void updateScreen(bool changeTempMode)
 {
 #ifdef TARGETTEMPSCREEN
-	if (currentChangeTempMode != changeTempMode)
-	{
+	if (currentChangeTempMode != changeTempMode) {
 		tft.fillScreen(VGA_BLACK);
-		if (!changeTempMode)
-		{
+		if (!changeTempMode) {
 			drawWireFrame();
 			drawTargetTemp();
 		}
 	}
-	if (changeTempMode)
-	{
+	if (changeTempMode)	{
 		drawTargetTempScreen();
 	}
-	else
-	{
+	else {
 #endif
 		drawTargetTemp();
 		drawTemperatures();
@@ -233,15 +227,14 @@ ICACHE_FLASH_ATTR void updateScreen(bool changeTempMode)
 		updateFireIcon();
 		drawUpdated();
 #ifdef TARGETTEMPSCREEN
-	}
-	
+	}	
 	currentChangeTempMode = changeTempMode;
 #endif
 }
 
-ICACHE_FLASH_ATTR void setupUI()
+void setupUI()
 {
-	start_time = system_get_rtc_time() / 100000;
+	//start_time = system_get_rtc_time() / 100000;
 	tft.setRotation(3);
 	tft.setTextColor(VGA_GREEN, VGA_BLACK);
 	tft.fillScreen(ILI9341_BLACK);

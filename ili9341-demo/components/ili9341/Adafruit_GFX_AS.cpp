@@ -53,10 +53,12 @@ extern "C" {
 #include "Font7s.h"
 #endif
 
+
+
 #define abs(x) ((x)<0 ? -(x) : (x))
 #define swap(x, y) do { typeof(x) temp##x##y = x; x = y; y = temp##x##y; } while (0)
 
-ICACHE_FLASH_ATTR Adafruit_GFX_AS::Adafruit_GFX_AS(int16_t w, int16_t h):
+Adafruit_GFX_AS::Adafruit_GFX_AS(int16_t w, int16_t h):
 		  WIDTH(w), HEIGHT(h)
 {
 	_width    = WIDTH;
@@ -67,7 +69,7 @@ ICACHE_FLASH_ATTR Adafruit_GFX_AS::Adafruit_GFX_AS(int16_t w, int16_t h):
 }
 
 // Draw a circle outline
-ICACHE_FLASH_ATTR void Adafruit_GFX_AS::drawCircle(int16_t x0, int16_t y0, int16_t r,
+void Adafruit_GFX_AS::drawCircle(int16_t x0, int16_t y0, int16_t r,
 		uint16_t color) {
 	int16_t f = 1 - r;
 	int16_t ddF_x = 1;
@@ -101,8 +103,8 @@ ICACHE_FLASH_ATTR void Adafruit_GFX_AS::drawCircle(int16_t x0, int16_t y0, int16
 	}
 }
 
-ICACHE_FLASH_ATTR void Adafruit_GFX_AS::drawCircleHelper( int16_t x0, int16_t y0,
-		int16_t r, uint8_t cornername, uint16_t color) {
+void Adafruit_GFX_AS::drawCircleHelper( int16_t x0, int16_t y0, int16_t r, uint8_t cornername, uint16_t color) 
+{
 	int16_t f     = 1 - r;
 	int16_t ddF_x = 1;
 	int16_t ddF_y = -2 * r;
@@ -137,16 +139,15 @@ ICACHE_FLASH_ATTR void Adafruit_GFX_AS::drawCircleHelper( int16_t x0, int16_t y0
 	}
 }
 
-ICACHE_FLASH_ATTR void Adafruit_GFX_AS::fillCircle(int16_t x0, int16_t y0, int16_t r,
-		uint16_t color) {
+void Adafruit_GFX_AS::fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color) 
+{
 	drawFastVLine(x0, y0-r, 2*r+1, color);
 	fillCircleHelper(x0, y0, r, 3, 0, color);
 }
 
 // Used to do circles and roundrects
-ICACHE_FLASH_ATTR void Adafruit_GFX_AS::fillCircleHelper(int16_t x0, int16_t y0, int16_t r,
-		uint8_t cornername, int16_t delta, uint16_t color) {
-
+void Adafruit_GFX_AS::fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, uint16_t color)
+{
 	int16_t f     = 1 - r;
 	int16_t ddF_x = 1;
 	int16_t ddF_y = -2 * r;
@@ -175,9 +176,8 @@ ICACHE_FLASH_ATTR void Adafruit_GFX_AS::fillCircleHelper(int16_t x0, int16_t y0,
 }
 
 // Bresenham's algorithm - thx wikpedia
-void Adafruit_GFX_AS::drawLine(int16_t x0, int16_t y0,
-		int16_t x1, int16_t y1,
-		uint16_t color) {
+void Adafruit_GFX_AS::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color)
+{
 	int16_t steep = abs(y1 - y0) > abs(x1 - x0);
 	if (steep) {
 		swap(x0, y0);
@@ -217,42 +217,42 @@ void Adafruit_GFX_AS::drawLine(int16_t x0, int16_t y0,
 }
 
 // Draw a rectangle
-void Adafruit_GFX_AS::drawRect(int16_t x, int16_t y,
-		int16_t w, int16_t h,
-		uint16_t color) {
+void Adafruit_GFX_AS::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
+{
 	drawFastHLine(x, y, w, color);
 	drawFastHLine(x, y+h-1, w, color);
 	drawFastVLine(x, y, h, color);
 	drawFastVLine(x+w-1, y, h, color);
 }
 
-void Adafruit_GFX_AS::drawFastVLine(int16_t x, int16_t y,
-		int16_t h, uint16_t color) {
+void Adafruit_GFX_AS::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
+{
 	// Update in subclasses if desired!
 	drawLine(x, y, x, y+h-1, color);
 }
 
-void Adafruit_GFX_AS::drawFastHLine(int16_t x, int16_t y,
-		int16_t w, uint16_t color) {
+void Adafruit_GFX_AS::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
+{
 	// Update in subclasses if desired!
 	drawLine(x, y, x+w-1, y, color);
 }
 
-void Adafruit_GFX_AS::fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
-		uint16_t color) {
+void Adafruit_GFX_AS::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
+{
 	// Update in subclasses if desired!
 	for (int16_t i=x; i<x+w; i++) {
 		drawFastVLine(i, y, h, color);
 	}
 }
 
-void Adafruit_GFX_AS::fillScreen(uint16_t color) {
+void Adafruit_GFX_AS::fillScreen(uint16_t color)
+{
 	fillRect(0, 0, _width, _height, color);
 }
 
 // Draw a rounded rectangle
-void Adafruit_GFX_AS::drawRoundRect(int16_t x, int16_t y, int16_t w,
-		int16_t h, int16_t r, uint16_t color) {
+void Adafruit_GFX_AS::drawRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color)
+{
 	// smarter version
 	drawFastHLine(x+r  , y    , w-2*r, color); // Top
 	drawFastHLine(x+r  , y+h-1, w-2*r, color); // Bottom
@@ -266,8 +266,8 @@ void Adafruit_GFX_AS::drawRoundRect(int16_t x, int16_t y, int16_t w,
 }
 
 // Fill a rounded rectangle
-void Adafruit_GFX_AS::fillRoundRect(int16_t x, int16_t y, int16_t w,
-		int16_t h, int16_t r, uint16_t color) {
+void Adafruit_GFX_AS::fillRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color)
+{
 	// smarter version
 	fillRect(x+r, y, w-2*r, h, color);
 
@@ -277,19 +277,16 @@ void Adafruit_GFX_AS::fillRoundRect(int16_t x, int16_t y, int16_t w,
 }
 
 // Draw a triangle
-ICACHE_FLASH_ATTR void Adafruit_GFX_AS::drawTriangle(int16_t x0, int16_t y0,
-		int16_t x1, int16_t y1,
-		int16_t x2, int16_t y2, uint16_t color) {
+void Adafruit_GFX_AS::drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color)
+{
 	drawLine(x0, y0, x1, y1, color);
 	drawLine(x1, y1, x2, y2, color);
 	drawLine(x2, y2, x0, y0, color);
 }
 
 // Fill a triangle
-ICACHE_FLASH_ATTR  void Adafruit_GFX_AS::fillTriangle ( int16_t x0, int16_t y0,
-		int16_t x1, int16_t y1,
-		int16_t x2, int16_t y2, uint16_t color) {
-
+void Adafruit_GFX_AS::fillTriangle ( int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color)
+{
 	int16_t a, b, y, last;
 
 	// Sort coordinates by Y order (y2 >= y1 >= y0)
@@ -363,10 +360,8 @@ ICACHE_FLASH_ATTR  void Adafruit_GFX_AS::fillTriangle ( int16_t x0, int16_t y0,
 	}
 }
 
-void Adafruit_GFX_AS::drawBitmap(int16_t x, int16_t y,
-		const uint16_t *bitmap, int16_t w, int16_t h) {
-
-
+void Adafruit_GFX_AS::drawBitmap(int16_t x, int16_t y, const uint16_t *bitmap, int16_t w, int16_t h)
+{
 	for(uint16_t j=0; j<h; j++) {
 		for(uint16_t i=0; i<w; i++ ) {
 			drawPixel(x+i, y+j, bitmap[j * w + i]);
@@ -385,11 +380,11 @@ void Adafruit_GFX_AS::setTextColor(uint16_t c, uint16_t b) {
 	textbgcolor = b;
 }
 
-ICACHE_FLASH_ATTR uint8_t Adafruit_GFX_AS::getRotation(void) {
+uint8_t Adafruit_GFX_AS::getRotation(void) {
 	return rotation;
 }
 
-ICACHE_FLASH_ATTR void Adafruit_GFX_AS::setRotation(uint8_t x) {
+void Adafruit_GFX_AS::setRotation(uint8_t x) {
 	rotation = (x & 3);
 	switch(rotation) {
 	case 0:
@@ -422,7 +417,7 @@ void Adafruit_GFX_AS::invertDisplay(bool i) {
  ** Function name:           drawUnicode
  ** Descriptions:            draw a unicode
  ***************************************************************************************/
-ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawUnicode(uint16_t uniCode, uint16_t x, uint16_t y, uint8_t size)
+int Adafruit_GFX_AS::drawUnicode(uint16_t uniCode, uint16_t x, uint16_t y, uint8_t size)
 {
 
 	if (size) uniCode -= 32;
@@ -480,7 +475,6 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawUnicode(uint16_t uniCode, uint16_t x,
 	uint16_t w = (width+ 7) / 8;
 	uint16_t pX      = 0;
 	uint16_t pY      = y;
-	uint16_t color   = 0;
 	uint8_t line = 0;
 
 		for(int i=0; i<height; i++)
@@ -510,7 +504,7 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawUnicode(uint16_t uniCode, uint16_t x,
  ** Function name:           drawNumber unsigned with size
  ** Descriptions:            drawNumber
  ***************************************************************************************/
-ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawNumber(long long_num,uint16_t poX, uint16_t poY, uint8_t size)
+int Adafruit_GFX_AS::drawNumber(long long_num,uint16_t poX, uint16_t poY, uint8_t size)
 {
 	char tmp[10];
 	if (long_num < 0) snprintf(tmp, sizeof(tmp), "%d", long_num);
@@ -522,7 +516,7 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawNumber(long long_num,uint16_t poX, ui
  ** Function name:           drawChar
  ** Descriptions:            draw char
  ***************************************************************************************/
-ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawChar(char c, uint16_t x, uint16_t y, uint8_t size)
+int Adafruit_GFX_AS::drawChar(char c, uint16_t x, uint16_t y, uint8_t size)
 {
 	return drawUnicode(c, x, y, size);
 }
@@ -531,7 +525,7 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawChar(char c, uint16_t x, uint16_t y, 
  ** Function name:           drawString
  ** Descriptions:            draw string
  ***************************************************************************************/
-ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawString(const char *string, uint16_t poX, uint16_t poY, uint8_t size)
+int Adafruit_GFX_AS::drawString(const char *string, uint16_t poX, uint16_t poY, uint8_t size)
 {
 	uint16_t sumX = 0;
 
@@ -540,7 +534,8 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawString(const char *string, uint16_t p
 
 		uint16_t xPlus = drawChar(*string, poX, poY, size);
 		sumX += xPlus;
-		*string++;
+		//*string++;
+		string++;
 
 		//        if(poX < 264)
 			//        {
@@ -555,7 +550,7 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawString(const char *string, uint16_t p
  ** Function name:           drawCentreString
  ** Descriptions:            draw string across centre
  ***************************************************************************************/
-ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawCentreString(const char *string, uint16_t dX, uint16_t poY, uint8_t size)
+int Adafruit_GFX_AS::drawCentreString(const char *string, uint16_t dX, uint16_t poY, uint8_t size)
 {
 	uint16_t sumX = 0;
 	uint16_t len = 0;
@@ -580,27 +575,25 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawCentreString(const char *string, uint
 #endif
 #ifdef LOAD_FONT7
 		if (size==7) len += *(widtbl_f7s+ascii-32)+2;
-		*pointer++;
+		//*pointer++;
+		pointer++;
 #endif
 	}
-
 	int poX = dX - len/2;
-
-	if (poX < 0) poX = 0;
-
+	if (poX < 0) { 
+		poX = 0;
+	}
 	while(*string)
 	{
-
 		uint16_t xPlus = drawChar(*string, poX, poY, size);
 		sumX += xPlus;
-		*string++;
+		//*string++;
+		string++;
 
-		if(poX < 264)
-		{
+		if(poX < 264) {
 			poX += xPlus;                                     /* Move cursor right            */
 		}
 	}
-
 	return sumX;
 }
 
@@ -608,7 +601,7 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawCentreString(const char *string, uint
  ** Function name:           drawRightString
  ** Descriptions:            draw string right justified
  ***************************************************************************************/
-ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawRightString(const char *string, uint16_t dX, uint16_t poY, uint8_t size)
+int Adafruit_GFX_AS::drawRightString(const char *string, uint16_t dX, uint16_t poY, uint8_t size)
 {
 	int sumX = 0;
 	int len = 0;
@@ -634,26 +627,24 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawRightString(const char *string, uint1
 #ifdef LOAD_FONT7
 		if (size==7) len += *(widtbl_f7s+ascii-32)+2;
 #endif
-		*pointer++;
+		//*pointer++;
+		pointer++;
 	}
-
 	int poX = dX - len;
-
-	if (poX < 0) poX = 0;
+	if (poX < 0) {
+		poX = 0;
+	}
 
 	while(*string)
 	{
-
 		uint16_t xPlus = drawChar(*string, poX, poY, size);
 		sumX += xPlus;
-		*string++;
-
-		if(poX < 264)
-		{
+		//*string++;
+		string++;
+		if(poX < 264) {
 			poX += xPlus;                                     /* Move cursor right            */
 		}
 	}
-
 	return sumX;
 }
 
@@ -661,7 +652,7 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawRightString(const char *string, uint1
  ** Function name:           drawFloat
  ** Descriptions:            drawFloat
  ***************************************************************************************/
-ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawFloat(float floatNumber, uint8_t decimal, uint16_t poX, uint16_t poY, uint8_t size)
+int Adafruit_GFX_AS::drawFloat(float floatNumber, uint8_t decimal, uint16_t poX, uint16_t poY, uint8_t size)
 {
 	unsigned long temp=0;
 	float decy=0.0;
@@ -672,44 +663,34 @@ ICACHE_FLASH_ATTR int Adafruit_GFX_AS::drawFloat(float floatNumber, uint8_t deci
 	int sumX    = 0;
 	uint16_t xPlus   = 0;
 
-	if(floatNumber-0.0 < eep)       // floatNumber < 0
-			{
-		xPlus = drawChar('-',poX, poY, size);
-		floatNumber = -floatNumber;
-
-		poX  += xPlus;
-		sumX += xPlus;
-			}
+	if(floatNumber-0.0 < eep) {     // floatNumber < 0
+	xPlus = drawChar('-',poX, poY, size);
+	floatNumber = -floatNumber;
+	poX  += xPlus;
+	sumX += xPlus;
+	}
 
 	for (unsigned char i=0; i<decimal; ++i)
 	{
 		rounding /= 10.0;
 	}
-
 	floatNumber += rounding;
-
 	temp = (long)floatNumber;
-
-
 	xPlus = drawNumber(temp,poX, poY, size);
-
 	poX  += xPlus;
 	sumX += xPlus;
-
-	if(decimal>0)
-	{
+	
+	if(decimal>0) {
 		xPlus = drawChar('.',poX, poY, size);
 		poX += xPlus;                                       /* Move cursor right            */
 		sumX += xPlus;
 	}
-	else
-	{
+	else {
 		return sumX;
 	}
 
 	decy = floatNumber - temp;
-	for(unsigned char i=0; i<decimal; i++)
-	{
+	for(unsigned char i=0; i<decimal; i++) {
 		decy *= 10;                                                      /* for the next decimal         */
 		temp = decy;                                                    /* get the decimal              */
 		xPlus = drawNumber(temp,poX, poY, size);
