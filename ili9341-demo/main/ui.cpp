@@ -240,4 +240,5 @@ void setupUI()
 	tft.fillScreen(ILI9341_BLACK);
 	drawWireFrame();
 	drawTargetTemp();
+	updateScreen(false);
 }

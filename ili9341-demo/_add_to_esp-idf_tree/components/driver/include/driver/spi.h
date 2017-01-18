@@ -18,6 +18,11 @@
 #include <esp_types.h>
 #include "dma.h"
 
+#define SPI_USR_ADDR_VALUE  0xFFFFFFFF
+#define SPI_USR_ADDR_VALUE_M  ((SPI_USR_ADDR_VALUE_V)<<(SPI_USR_ADDR_VALUE_S))
+#define SPI_USR_ADDR_VALUE_V  0xFFFFFFFF
+#define SPI_USR_ADDR_VALUE_S  0
+
 //*****************************************************************************
 //
 // Make sure all of the definitions in this header have a C binding.

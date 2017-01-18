@@ -34,6 +34,7 @@ extern void setupUI();
 
 void lcd_debug(void *pvParameters)
 {
+    vTaskDelay(1000 / portTICK_RATE_MS);
 	tft.begin();
 	tft.fillScreen(ILI9341_GREEN);
 	setupUI();
@@ -42,6 +43,7 @@ void lcd_debug(void *pvParameters)
 
 extern "C" void app_main(void* arg) 
 {
+	ets_printf("Pause\n");	
     xTaskCreate(lcd_debug,"lcd_debug", 4096, NULL, 3, NULL);
 	ets_printf("LCD_init done....\n");	
     vTaskDelete(NULL);

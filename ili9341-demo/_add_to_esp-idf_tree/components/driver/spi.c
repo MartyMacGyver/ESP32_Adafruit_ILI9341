@@ -759,7 +759,6 @@ int  spi_slave_send_data(spi_num_e spiNum, uint32_t *pOutData, uint8_t outLen)
  */
 int  spi_slave_recv_data(spi_num_e spiNum, void(*isrFunc)(void*))
 {
-    char idx = 0;
     if (spiNum > SpiNum_Max) {
         return -1;
     }
@@ -827,7 +826,6 @@ int  spi_master_recv_status(spi_num_e spiNum)
 
     while (READ_PERI_REG(SPI_CMD_REG(spiNum))&SPI_USR);
 
-    uint8_t data = (uint8_t)(READ_PERI_REG(SPI_W0_REG(spiNum)) & 0xff);
     return (uint8_t)(READ_PERI_REG(SPI_W0_REG(spiNum)) & 0xff);
 }
 

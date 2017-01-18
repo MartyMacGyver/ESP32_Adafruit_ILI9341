@@ -1,6 +1,7 @@
 #include "Adafruit_ILI9341_fast_as.h"
 #include "Adafruit_GFX_AS.h"
 #include "driver/spi.h"
+#include "soc/spi_reg.h"
 #include "rom/ets_sys.h"
 #include "driver/hspi.h"
 
