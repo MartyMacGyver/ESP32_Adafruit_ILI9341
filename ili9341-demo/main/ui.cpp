@@ -2,13 +2,15 @@
 
 #include <Adafruit_GFX_AS.h>
 #include <Adafruit_ILI9341_fast_as.h>
-#include <time.h>
+
+#include "time.h"
+#include <sys/time.h>
 
 extern "C" {
 #include "mini-printf.h"
 }
 
-#define TARGETTEMPSCREEN
+//#define TARGETTEMPSCREEN
 
 #define VGA_BLACK		0x0000
 #define VGA_WHITE		0xFFFF
@@ -46,11 +48,13 @@ extern time_t total_on_time;
 extern time_t total_off_time;
 extern time_t last24h_on_time;
 extern time_t last24h_off_time;
+extern time_t cursecs;
 
 time_t start_time;
 
 #define HEADERTEXT 2
 #define LINETEXT 2
+#define BIGNUM 7
 
 int color(uint8_t r, uint8_t g, uint8_t b)
 {
@@ -88,8 +92,8 @@ void drawWireFrame()
 	tft.drawString("Current", 140, placeholderbody + 2, LINETEXT);
 	tft.drawString("Target", 140, placeholderbody + 22, LINETEXT);
 
-	//Fire icon placeholder
-	drawPlaceholder(0, 80, 133, 60, VGA_RED, "FIRE");
+	//Heater icon placeholder
+	drawPlaceholder(0, 80, 133, 60, VGA_RED, "HEATER");
 
 	//Status placeholder
 	placeholderbody = drawPlaceholder(0, 142, 319, 97, VGA_WHITE, "UPDATED (secs ago)");
@@ -105,46 +109,49 @@ void drawWireFrame()
 void drawTemperatures()
 {
 	tft.setTextColor(VGA_AQUA, VGA_BLACK);
-	tft.fillRect(255, 20, 48, 16, VGA_BLACK);
+//	tft.fillRect(255, 20, 48, 16, VGA_BLACK);
 	tft.drawFloat(room1_temperature, 1, 255, 20, LINETEXT);
 
-	tft.fillRect(255, 40, 48, 16, VGA_BLACK);
+//	tft.fillRect(255, 40, 48, 16, VGA_BLACK);
 	tft.drawFloat(room2_temperature, 1, 255, 40, LINETEXT);
 
-	tft.fillRect(255, 60, 48, 16, VGA_BLACK);
+//	tft.fillRect(255, 60, 48, 16, VGA_BLACK);
 	tft.drawFloat(outside_temperature, 1, 255, 60, LINETEXT);
 }
 
 void drawWaterTemperatures()
 {
 	tft.setTextColor(VGA_AQUA, VGA_BLACK);
-	tft.fillRect(255, 100, 48, 16, VGA_BLACK);
+//	tft.fillRect(255, 100, 48, 16, VGA_BLACK);
 	tft.drawFloat(RW_temperature, 2, 255, 100, LINETEXT);
 
-	tft.fillRect(255, 120, 48, 16, VGA_BLACK);
+//	tft.fillRect(255, 120, 48, 16, VGA_BLACK);
 	tft.drawFloat(target_RW_temperature, 2, 255, 120, LINETEXT);
 }
 
 time_t now()
 {
-return 1;
+    struct timeval tv;
+    gettimeofday(&tv, NULL); 
+   	return tv.tv_sec;
+    //return 1;
 	//return system_get_rtc_time() / 100000 - start_time;
 }
 
 void drawUpdated()
 {
 	tft.setTextColor(VGA_SILVER, VGA_BLACK);
-	time_t cursecs = now();
-	tft.fillRect(100, 162, 48, 16, VGA_BLACK);
+	cursecs = now();
+//	tft.fillRect(100, 162, 48, 16, VGA_BLACK);
 	tft.drawNumber(cursecs - room1_updated, 100, 162, LINETEXT);
 
-	tft.fillRect(100, 182, 48, 16, VGA_BLACK);
+//	tft.fillRect(100, 182, 48, 16, VGA_BLACK);
 	tft.drawNumber(cursecs - room2_updated, 100, 182, LINETEXT);
 
-	tft.fillRect(100, 202, 48, 16, VGA_BLACK);
+//	tft.fillRect(100, 202, 48, 16, VGA_BLACK);
 	tft.drawNumber(cursecs - outside_updated, 100, 202, LINETEXT);
 
-	tft.fillRect(260, 162, 48, 16, VGA_BLACK);
+//	tft.fillRect(260, 162, 48, 16, VGA_BLACK);
 	tft.drawNumber(cursecs - heater_state_changed_time, 260, 162, LINETEXT);
 
 	char buf[20];
@@ -163,10 +170,10 @@ void drawTargetTemp()
 	uint8_t colorvalue = (target_room_temperature - min_target_temp) / (max_target_temp - min_target_temp) * 255;
 	int _color = color(colorvalue, 0, 255 - colorvalue);
 	tft.setTextColor(_color, VGA_BLACK);
-	tft.drawFloat(target_room_temperature, 1, 7, 24, 7);
+	tft.drawFloat(target_room_temperature, 1, 7, 24, BIGNUM);
 }
 
-void updateFireIcon()
+void updateHeaterIcon()
 {
 	if (heater_enabled)	{
 		tft.setTextColor(VGA_RED, VGA_BLACK);
@@ -202,7 +209,7 @@ void drawTargetTempScreen()
 	uint8_t colorvalue = (target_room_temperature - min_target_temp) / (max_target_temp - min_target_temp) * 255;
 	int _color = color(colorvalue, 0, 255 - colorvalue);
 	tft.setTextColor(_color, VGA_BLACK);
-	tft.drawFloat(target_room_temperature, 1, tft.width() / 2 - 64, tft.height() / 2 - 32, 7);
+	tft.drawFloat(target_room_temperature, 1, tft.width() / 2 - 64, tft.height() / 2 - 32, BIGNUM);
 }
 
 bool currentChangeTempMode = false;
@@ -224,7 +231,7 @@ void updateScreen(bool changeTempMode)
 		drawTargetTemp();
 		drawTemperatures();
 		drawWaterTemperatures();
-		updateFireIcon();
+		updateHeaterIcon();
 		drawUpdated();
 #ifdef TARGETTEMPSCREEN
 	}	
@@ -234,7 +241,9 @@ void updateScreen(bool changeTempMode)
 
 void setupUI()
 {
-	//start_time = system_get_rtc_time() / 100000;
+	struct timeval tv;
+    gettimeofday(&tv, NULL); 
+   	start_time = tv.tv_sec; //tv.tv_usec
 	tft.setRotation(3);
 	tft.setTextColor(VGA_GREEN, VGA_BLACK);
 	tft.fillScreen(ILI9341_BLACK);
