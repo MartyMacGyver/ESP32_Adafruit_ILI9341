@@ -4,6 +4,11 @@
 #include <Adafruit_ILI9341_fast_as.h>
 #include <time.h>
 
+// time
+#include "esp_system.h"
+#include <sys/time.h>
+#include "user_str.h"
+
 extern "C" {
 #include "mini-printf.h"
 }
@@ -127,8 +132,24 @@ void drawWaterTemperatures()
 
 time_t now()
 {
-return 1;
+// return 1;
 	//return system_get_rtc_time() / 100000 - start_time;
+/* note 
+
+system_get_rtc_time(void)
+
+This function was intentionally removed,
+as the functionality is now provided by POSIX gettimeofday function.
+https://github.com/espressif/esp-idf/issues/196
+
+*/
+struct timeval tv = { .tv_sec = 0, .tv_usec = 0 }; 
+uint32_t sec, us;
+         gettimeofday(&tv, NULL); 
+         (sec) = tv.tv_sec;  
+         (us) = tv.tv_usec; 
+return sec;
+
 }
 
 void drawUpdated()
@@ -235,10 +256,24 @@ void updateScreen(bool changeTempMode)
 void setupUI()
 {
 	//start_time = system_get_rtc_time() / 100000;
+	
+	// test set..
+	struct timeval tv = { .tv_sec = 13800, .tv_usec = 0 }; 
+        // uint32_t sec, us;
+         
+	settimeofday(&tv, NULL); 
+         // (sec) = tv.tv_sec;  
+         
+		 // (us) = tv.tv_usec; 
+	
+	
+	//start_time = system_get_rtc_time() / 100000;
+	start_time = now();
+	
 	tft.setRotation(3);
 	tft.setTextColor(VGA_GREEN, VGA_BLACK);
 	tft.fillScreen(ILI9341_BLACK);
 	drawWireFrame();
 	drawTargetTemp();
-	updateScreen(false);
+	updateScreen(true);
 }
