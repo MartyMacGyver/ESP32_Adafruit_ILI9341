@@ -50,7 +50,7 @@ The sample code consists of two parts:
 
 What to demonstrate is controlled by macro UIDEMO defined at the beginning of user_main.cpp. If it's defined then the sample HVAC controller UI is shown, else, the rotating cube is rendered.
 
-*** Note: For HVAC display demo we are using the ESP32-WROVER-KIT ***
+*** Note: For HVAC display demo we are using the ESP-WROVER-KIT ***
 
 ## Wiring
 The code uses hardware HSPI with hardware controlled CS, so the wiring shall be as follows: 
