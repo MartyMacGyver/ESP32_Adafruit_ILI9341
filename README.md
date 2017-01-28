@@ -4,7 +4,7 @@ See end of this file for credits and code provenance
 
 This uses a combination of [Adafruit's Arduino ILI9341 driver](https://github.com/adafruit/Adafruit_ILI9341) (heavily modified) and [their Arduino display graphics library](https://github.com/adafruit/Adafruit-GFX-Library) (with a few specific fonts from there compiled in).
 
-Note that the original Arduino libraries above should work for those using [the Arduino-ESP32 project](https://github.com/espressif/arduino-esp32), with some modificaitons for your particular setup (e.g., the ESP-WROVER-KIT). The ILI9341 driver in particular appears to be ESP32-aware now. While there are no plans to convert the native demos below to Arduino-ESP32 code, other Arduino-specific demos may be added in the future.
+Note that the original Arduino libraries above should work for those using [the Arduino-ESP32 project](https://github.com/espressif/arduino-esp32), with some modificaitons for your particular setup (e.g., the ESP-WROVER-KIT). The ILI9341 driver in particular appears to be ESP32-aware now. While there are no plans to convert the native SDK-based demos below to Arduino-ESP32 code, Arduino-specific demos are here as well.
 
 ## Setup
 The sample project is to be built with Espressif IDF as configured for the ESP32:
@@ -18,7 +18,12 @@ The driver is written in C++ which is not well supported by ESP8266 toolchain an
 In spite of the fact that according to the datasheet max ILI9341's clock speed is 10MHz mine robustly works at up to 40MHz so I added SPI speed prescaler macro at the beginning of hspi.c.
 Defining it to 1 means HSPI will be clocked at 40MHz, 4 means 10 MHz.
 
-## Sample code
+## Sample code (tested using the ESP-WROVER-KIT)
+
+  - demos/arduino-esp32 - Install Arduino-ESP32, add the Adafruit_ILI9341 and the Adafruit-GFX-Library, then build and flash via the Arduino IDE.
+
+  - demos/esp-idf - Install Espressif's esp-idf SDK and build and flash using the usual SDK methods.
+
 
 *** Note: HVAC display demo is the only part being migrated from ESP8266 at this point ***
 
