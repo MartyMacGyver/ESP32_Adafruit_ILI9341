@@ -1,4 +1,9 @@
 /***************************************************
+ Modified graphics demo for the ESP-WROVER-KIT and equivalent 
+ projects using Ardiono-ESP32 with an ILI9341 LCD display
+ By Martin Falatic
+ ****************************************************/
+/***************************************************
   This is our GFX example for the Adafruit ILI9341 Breakout and Shield
   ----> http://www.adafruit.com/products/1651
 
@@ -57,16 +62,23 @@ void setup() {
   Serial.print("Image Format: 0x"); Serial.println(x, HEX);
   x = tft.readcommand8(ILI9341_RDSELFDIAG);
   Serial.print("Self Diagnostic: 0x"); Serial.println(x, HEX); 
-  
+}
+
+void loop(void) {
   Serial.println(F("Benchmark                Time (microseconds)"));
   delay(10);
   Serial.print(F("Screen fill              "));
   Serial.println(testFillScreen());
   delay(500);
 
-  Serial.print(F("Text                     "));
-  Serial.println(testText());
-  delay(3000);
+  for(uint8_t rotation=0; rotation<4; rotation++) {
+    Serial.print(F("Text (rotation="));
+    Serial.print(rotation);
+    Serial.print(F(")        "));
+    tft.setRotation(rotation);
+    Serial.println(testText());
+    delay(1000);
+  }
 
   Serial.print(F("Lines                    "));
   Serial.println(testLines(ILI9341_CYAN));
@@ -108,16 +120,8 @@ void setup() {
   delay(500);
 
   Serial.println(F("Done!"));
-
-}
-
-
-void loop(void) {
-  for(uint8_t rotation=0; rotation<4; rotation++) {
-    tft.setRotation(rotation);
-    testText();
-    delay(1000);
-  }
+  Serial.println();
+  delay(3000);
 }
 
 unsigned long testFillScreen() {
