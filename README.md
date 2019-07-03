@@ -2,7 +2,7 @@
 
 See end of this file for credits and code provenance
 
-This project uses a combination of [Adafruit's Arduino ILI9341 driver](https://github.com/adafruit/Adafruit_ILI9341) (heavily modified) and [their Arduino display graphics library](https://github.com/adafruit/Adafruit-GFX-Library) (with a few specific fonts from there compiled in).
+This project uses a combination of [Adafruit's Arduino ILI9341 driver](https://github.com/adafruit/Adafruit_ILI9341) and [their Arduino display graphics library](https://github.com/adafruit/Adafruit-GFX-Library) (with a few extra fonts added from [DSEG](https://github.com/keshikan/DSEG)).
 
 The original Arduino libraries above work for those using [the Arduino-ESP32 project](https://github.com/espressif/arduino-esp32), with some pin modifications for your particular setup (e.g., the ESP-WROVER-KIT, which also controls the backlight on GPIO_5). The ILI9341 driver in particular is ESP32-aware now.
 
@@ -12,14 +12,17 @@ While there are no plans to convert the native SDK-based demos below to Arduino-
 
   - demos/arduino-esp32
       - Install Arduino-ESP32
-      - Add the Adafruit_ILI9341 and the Adafruit-GFX-Library
+      - Add the current Adafruit_ILI9341 and Adafruit_GFX_Library
       - Build and flash via the Arduino IDE
 
-  - demos/esp-idf
+  - demos/esp-idf  *(CURRENTLY DEFUNCT)*
       - Install [Espressif's esp-idf SDK and toolchain](https://github.com/espressif/esp-idf)
       - Build and flash using the usual SDK methods (`make`; `make flash`; etc.).
 
 ## About the SDK-based sample code:
+
+### THIS SECTION AND ITS CODE ARE CURRENTLY DEFUNCT
+
 The sample code consists of two parts:
   - ~~Rotating cube https://youtu.be/kEWThKicO0Q~~
   - Sample HVAC controller UI using the ESP-WROVER-KIT (for the extended version of this: http://habrahabr.ru/post/214257/) https://youtu.be/VraLl8XK1CI
