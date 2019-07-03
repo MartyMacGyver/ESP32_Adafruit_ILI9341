@@ -38,7 +38,8 @@ Adafruit_ILI9341 * tft;
 #define SPI_MOSI 23
 #define SPI_SS   -1  // Not used
 
-//#define TARGETTEMPSCREEN
+//#define SELF_TEST
+#define TARGETTEMPSCREEN
 
 // Note: RGB888=0xA0A0A0 ; RGB555 = hex(((RGB888&0xf80000)>>8) + ((RGB888&0xfc00)>>5) + ((RGB888&0xf8)>>3)); print(RGB888, '->', RGB555);
 
@@ -310,21 +311,33 @@ void drawWireFrame()
   drawString(tft, ontm24hSz, 145, stsBodyOffsetV + 65, LINETEXT, VGA_SILVER,  VGA_BLACK);
 }
 
-void drawTargetTemp()
+void drawTargetTemp(int x=-1, int y=-1)
 {
+  if (x < 0) {
+    x = 10;
+  }
+  if (y < 0) {
+    y = tgtBodyOffsetV+5;
+  }
   uint8_t colorvalue = (target_room_temperature - min_target_temp) / (max_target_temp - min_target_temp) * 255;
   int _color = color(colorvalue, 0, 255 - colorvalue);
   snprintf(strbuf, strbufSize, "%.1f", target_room_temperature);
-  drawString(tft, strbuf,  10, tgtBodyOffsetV+5, 1, _color, VGA_BLACK, tgtFontPtr, ALIGN_S, 113, 40);
+  drawString(tft, strbuf, x, y, 1, _color, VGA_BLACK, tgtFontPtr, ALIGN_S, 113, 40);
 }
 
-void drawHeaterIcon()
+void drawHeaterIcon(int x=-1, int y=-1)
 {
+  if (x < 0) {
+    x = 10;
+  }
+  if (y < 0) {
+    y = htrBodyOffsetV+5;
+  }
   if (heater_enabled) {
-    drawString(tft, "ON",  10, htrBodyOffsetV+5, 1, VGA_SILVER, VGA_BLACK, htrFontPtr, ALIGN_S, 113, 25);
+    drawString(tft, "ON",  x, y, 1, VGA_SILVER, VGA_BLACK, htrFontPtr, ALIGN_S, 113, 25);
   }
   else {
-    drawString(tft, "OFF", 10, htrBodyOffsetV+5, 1, VGA_SILVER, VGA_BLACK, htrFontPtr, ALIGN_S, 113, 25);
+    drawString(tft, "OFF", x, y, 1, VGA_SILVER, VGA_BLACK, htrFontPtr, ALIGN_S, 113, 25);
   }
 }
 
@@ -358,9 +371,9 @@ void drawStatistics()
   float ontm24h = float(last24h_on_time) / (last24h_on_time + last24h_off_time) * 100;
   snprintf(uptimeStr, COUNT_OF(uptimeStr), "%ud %02uh %02um", days, hours, mins);
 
-  drawInt(   tft, room1_update_s,         10,  60, stsBodyOffsetV +  6, LINETEXT, VGA_AQUA, VGA_BLACK, defaultFontPtr, ALIGN_E, 60, 0);
-  drawInt(   tft, room2_update_s,         10,  60, stsBodyOffsetV + 26, LINETEXT, VGA_AQUA, VGA_BLACK, defaultFontPtr, ALIGN_E, 60, 0);
-  drawInt(   tft, outside_update_s,       10,  60, stsBodyOffsetV + 46, LINETEXT, VGA_AQUA, VGA_BLACK, defaultFontPtr, ALIGN_E, 60, 0);
+  drawInt(   tft, room1_update_s,         10,  70, stsBodyOffsetV +  6, LINETEXT, VGA_AQUA, VGA_BLACK, defaultFontPtr, ALIGN_E, 60, 0);
+  drawInt(   tft, room2_update_s,         10,  70, stsBodyOffsetV + 26, LINETEXT, VGA_AQUA, VGA_BLACK, defaultFontPtr, ALIGN_E, 60, 0);
+  drawInt(   tft, outside_update_s,       10,  70, stsBodyOffsetV + 46, LINETEXT, VGA_AQUA, VGA_BLACK, defaultFontPtr, ALIGN_E, 60, 0);
   drawInt(   tft, heater_change_s,        10, 250, stsBodyOffsetV +  6, LINETEXT, VGA_AQUA, VGA_BLACK, defaultFontPtr, ALIGN_E, 60, 0);
   drawString(tft, uptimeStr,                  250, stsBodyOffsetV + 26, LINETEXT, VGA_AQUA, VGA_BLACK, defaultFontPtr, ALIGN_E, 60, 0);
   drawFloat( tft, onpcntg, 5, 1,              250, stsBodyOffsetV + 46, LINETEXT, VGA_AQUA, VGA_BLACK, defaultFontPtr, ALIGN_E, 60, 0);
@@ -388,10 +401,12 @@ void drawTargetTempScreen()
       tft->drawRoundRect(0, tft->height() - y - barHeight,     width,     barHeight,     3, _color);
     }
   }
-  drawTargetTemp();
+  drawTargetTemp(160);
+  drawHeaterIcon(160);
 }
 
 bool currentChangeTempMode = false;
+
 void updateScreen(bool changeTempMode)
 {
 #ifdef TARGETTEMPSCREEN
@@ -399,7 +414,6 @@ void updateScreen(bool changeTempMode)
     tft->fillScreen(VGA_BLACK);
     if (!changeTempMode) {
       drawWireFrame();
-      drawTargetTemp();
     }
   }
   if (changeTempMode) {
@@ -482,26 +496,23 @@ void setup(void) {
 
   Serial.println();
 
-  #define TFT_CS   22
-  #define TFT_DC   21
-  #define TFT_RST  18 // Reset pin
-  #define TFT_BKLT 5
   SPIClass * hspi = new SPIClass(HSPI);
-  hspi->begin(19, 25, 23, -1);
+  hspi->begin(SPI_SCK, SPI_MISO, SPI_MOSI, SPI_SS);
+
   tft = new Adafruit_ILI9341(hspi, TFT_DC, TFT_CS, TFT_RST);
-  #if defined(TFT_BKLT)
+  if (TFT_BKLT >= 0) {
     pinMode(TFT_BKLT, OUTPUT);
     digitalWrite(TFT_BKLT, HIGH);
-  #endif
+  }
 
   tft->begin();
   tft->setRotation(1);
   tft->fillScreen(VGA_BLACK);
 
-  #if defined(TFT_BKLT)
+  if (TFT_BKLT >= 0) {
     pinMode(TFT_BKLT, OUTPUT);
     digitalWrite(TFT_BKLT, LOW);
-  #endif
+  }
 
   #ifdef SELF_TEST
     test_screen();
@@ -509,7 +520,7 @@ void setup(void) {
     test_alignment();
   #endif
 
-  Serial.println("LCD_init done....\n");  
+  Serial.println("LCD initialized!\n");  
 
   setupUI();
 }
@@ -522,7 +533,7 @@ void loop() {
 
   if (heater_enabled) {
       target_room_temperature += 0.1;
-      if (target_room_temperature >= 30.0) {
+      if (target_room_temperature >= 25.0) {
         heater_enabled = false;
         heater_st_chg_time = curr_secs;
       }
@@ -534,9 +545,15 @@ void loop() {
         heater_st_chg_time = curr_secs;
       }
   }
-  updateScreen(false);
+
+  if (((now()-init_secs)/15 & 1) == 0) {
+    updateScreen(false);
+  }
+  else {
+    updateScreen(true);
+  }
 
   elapsedTime = millis()-startTime;
   Serial.print("Took "); Serial.print(elapsedTime); Serial.println(" ms");
-  delay(955);
+  delay(300);
 }

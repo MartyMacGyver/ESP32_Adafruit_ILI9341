@@ -2,7 +2,7 @@
 
 See end of this file for credits and code provenance
 
-This project uses a combination of [Adafruit's Arduino ILI9341 driver](https://github.com/adafruit/Adafruit_ILI9341) and [their Arduino display graphics library](https://github.com/adafruit/Adafruit-GFX-Library) (with a few extra fonts added from [DSEG](https://github.com/keshikan/DSEG)).
+This project uses a combination of [Adafruit's Arduino ILI9341 driver](https://github.com/adafruit/Adafruit_ILI9341) and [their Arduino display graphics library](https://github.com/adafruit/Adafruit-GFX-Library) (with a few extra fonts added from [DSEG](https://github.com/keshikan/DSEG) and processed via [http://oleddisplay.squix.ch/](http://oleddisplay.squix.ch/)).
 
 The original Arduino libraries above work for those using [the Arduino-ESP32 project](https://github.com/espressif/arduino-esp32), with some pin modifications for your particular setup (e.g., the ESP-WROVER-KIT, which also controls the backlight on GPIO_5). The ILI9341 driver in particular is ESP32-aware now.
 
