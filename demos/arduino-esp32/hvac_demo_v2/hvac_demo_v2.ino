@@ -79,14 +79,20 @@ Adafruit_ILI9341 * tft;
 #define WAD_PINK        0xfe7e  // 0xFFCDF3  // 255, 205, 243
 #define WAD_WHITE       0xffff  // 0xFFFFFF  // 255, 255, 255
 
+// Constants
+const float tgtMinDegrees   = 20.0;
+const float tgtMaxDegrees   = 25.0;
+const float stepSizeDegrees = 0.25;
+const int switchPeriodSecs  =   15;
+const int refreshDelayMs    =  950;
+
+// Initial values
 float target_room_temperature = 23.5;
 float RW_temperature = 65;
 float target_RW_temperature = 70;
 float room1_temperature = 23.4;
 float room2_temperature = 23.3;
 float outside_temperature = 2.4;
-float min_target_temp = 18;
-float max_target_temp = 26;
 bool heater_enabled = false;
 time_t room1_updated = -1;
 time_t room2_updated = -1;
@@ -168,9 +174,9 @@ void drawString(Adafruit_ILI9341 * tft, const char * textStr,
   }
 
   #ifdef DEBUG
-  snprintf(debugstr, debugstrSize, "getTextBounds() for string \"%s\" at (x=%d, y=%d) returned (x1=%d, y1=%d) with (min_w=%d, min_h=%d), (bbox_w=%d, bbox_h=%d)",
-    textStr, x, y, x1, y1, min_w, min_h, bbox_w, bbox_h);
-  Serial.println(debugstr);
+    snprintf(debugstr, debugstrSize, "getTextBounds() for string \"%s\" at (x=%d, y=%d) returned (x1=%d, y1=%d) with (min_w=%d, min_h=%d), (bbox_w=%d, bbox_h=%d)",
+      textStr, x, y, x1, y1, min_w, min_h, bbox_w, bbox_h);
+    Serial.println(debugstr);
   #endif
 
   int16_t new_x, new_y;
@@ -319,7 +325,7 @@ void drawTargetTemp(int x=-1, int y=-1)
   if (y < 0) {
     y = tgtBodyOffsetV+5;
   }
-  uint8_t colorvalue = (target_room_temperature - min_target_temp) / (max_target_temp - min_target_temp) * 255;
+  uint8_t colorvalue = (target_room_temperature - tgtMinDegrees - 1.0) / (tgtMaxDegrees - tgtMinDegrees + 2.0) * 255;
   int _color = color(colorvalue, 0, 255 - colorvalue);
   snprintf(strbuf, strbufSize, "%.1f", target_room_temperature);
   drawString(tft, strbuf, x, y, 1, _color, VGA_BLACK, tgtFontPtr, ALIGN_S, 113, 40);
@@ -382,15 +388,17 @@ void drawStatistics()
 
 void drawTargetTempScreen()
 {
+  float   graphFactor1 = 240.0;  // 1404.0 originally
+  float   graphFactor2 = 0.300;  // 0.1624 originally
   uint8_t barHeight = 8;
   uint8_t barSpace = 4;
-  uint8_t initialBarWidth = 8;
+  uint8_t initialBarWidth = 24;
   int numBars = tft->height() / (barHeight + barSpace);
   for (int i = 0; i < numBars; i++)
   {
-    float barTemp = min_target_temp + i * ((max_target_temp - min_target_temp) / numBars);
+    float barTemp = tgtMinDegrees - 1.0 + i * ((tgtMaxDegrees - tgtMinDegrees + 2.0) / numBars);
     int y = i * (barHeight + barSpace);
-    int width = initialBarWidth + 1.0f / 1404 * y * y + 0.1624 * y;
+    int width = (y*y*1.0f/graphFactor1) + (y*graphFactor2) + initialBarWidth;
     uint8_t colorvalue = float(i) / numBars * 255;
     int _color = color(colorvalue, 0, 255 - colorvalue);
     if (barTemp <= target_room_temperature) {
@@ -401,8 +409,8 @@ void drawTargetTempScreen()
       tft->drawRoundRect(0, tft->height() - y - barHeight,     width,     barHeight,     3, _color);
     }
   }
-  drawTargetTemp(160);
-  drawHeaterIcon(160);
+  drawHeaterIcon(200, 130);
+  drawTargetTemp(200, 180);
 }
 
 bool currentChangeTempMode = false;
@@ -532,21 +540,21 @@ void loop() {
   startTime = millis();
 
   if (heater_enabled) {
-      target_room_temperature += 0.1;
-      if (target_room_temperature >= 25.0) {
+      target_room_temperature += stepSizeDegrees;
+      if (target_room_temperature >= tgtMaxDegrees) {
         heater_enabled = false;
         heater_st_chg_time = curr_secs;
       }
     }
     else {
-      target_room_temperature -= 0.1;         
-      if (target_room_temperature <= 20.0) {
+      target_room_temperature -= stepSizeDegrees;         
+      if (target_room_temperature <= tgtMinDegrees) {
         heater_enabled = true;
         heater_st_chg_time = curr_secs;
       }
   }
 
-  if (((now()-init_secs)/15 & 1) == 0) {
+  if (((now()-init_secs)/switchPeriodSecs & 1) == 0) {
     updateScreen(false);
   }
   else {
@@ -554,6 +562,6 @@ void loop() {
   }
 
   elapsedTime = millis()-startTime;
-  Serial.print("Took "); Serial.print(elapsedTime); Serial.println(" ms");
-  delay(300);
+  Serial.print("Draw time = "); Serial.print(elapsedTime); Serial.print("ms; heap bytes free = "); Serial.print(ESP.getFreeHeap()); Serial.println("");
+  delay(refreshDelayMs);
 }
